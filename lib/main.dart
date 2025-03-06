@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:p0/list.dart';
-import 'package:p0/time.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,24 +19,18 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  //
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<HomePage> {
-  static List<String> items = List.generate(20, (int i) => '$i');
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-          child: TimePage(),
+      body: Center(
+          child: ListPage(),
       ),
     );
   }
-
-
-
 }
