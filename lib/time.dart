@@ -12,14 +12,17 @@ class TimePage extends StatefulWidget {
 class TimeState extends State<TimePage> with SingleTickerProviderStateMixin{
   GlobalKey<ListState> listPageKey = GlobalKey<ListState>();
   ValueNotifier<bool> isPause = ValueNotifier(true);
+  //AccelerometerEvent? _previousEvent;
   late AnimationController controller; //
+  Color clock_color = Colors.red;
   Duration d = Duration(seconds: 60);
   bool isReset = false;
-  double progress = 1.0;
+  double progress = 0.0;
 
   @override
   void initState() {
     super.initState();
+
     //ListPage(key: listPageKey);
 
     //Duration? firstItemTime = listPageKey.currentState?.ListFirstItem();
@@ -78,8 +81,8 @@ class TimeState extends State<TimePage> with SingleTickerProviderStateMixin{
   } */
 
   String get countText {
-    Duration count = controller.duration! * controller.value; //依照當前進度推測當前時間 (duration不變，但value會)
-    return controller.isDismissed //判斷是否被創建，保證未開始計時時顯示的時間正確
+    Duration count = controller.duration! * ((controller.value-1).abs()); //依照當前進度推測當前時間 (duration不變，但value會)
+    return controller.isDismissed || controller.value == 1//判斷是否被創建，保證未開始計時時顯示的時間正確
       ? "${controller.duration!.inHours.toString()}:${(controller.duration!.inMinutes % 60).toString().padLeft(2,'0')}:${(controller.duration!.inSeconds % 60).toString().padLeft(2,'0')}"
       : "${count.inHours.toString()}:${(count.inMinutes % 60).toString().padLeft(2,'0')}:${(count.inSeconds % 60).toString().padLeft(2,'0')}";
   }
@@ -115,13 +118,43 @@ class TimeState extends State<TimePage> with SingleTickerProviderStateMixin{
                     backgroundColor: Colors.grey[300], //進度條背景色
                     value: progress, //當前進度
                     strokeAlign: 6, //粗細
-                    color: Colors.blue, //進度條顏色
+                    color: clock_color, //進度條顏色
                   ),
+                ),
+
+                AnimatedBuilder(
+                  animation: controller,
+                  builder: (context,animation) {
+                    double angle = controller.value * 6.28;
+                    return Transform.rotate(
+                        angle: angle,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 8,
+                              height: 8,
+                              child: CircleAvatar(
+                                radius: 90,
+                                backgroundColor: clock_color,
+                              ),
+                            ),
+
+                            Container(
+                              width: 3,
+                              height: 70,
+                              color: clock_color,
+                            ),
+                            SizedBox(width: 3,height: 235,)
+                          ],
+                        ),
+                    );
+                  }
                 ),
 
                 GestureDetector(
                   onTap: () {
-                    showModalBottomSheet( //調整當前時間
+                    /*showModalBottomSheet( //調整當前時間
                         showDragHandle: true, //拖動欄
                         scrollControlDisabledMaxHeightRatio: 0.33, //0~1 顯示高度
                         context: context,
@@ -133,13 +166,21 @@ class TimeState extends State<TimePage> with SingleTickerProviderStateMixin{
                                 });
                               }
                           )
-                    );
+                    );*/
                   },
-                  child: AnimatedBuilder( //動畫監聽器
-                    animation: controller, //綁定controller
-                    builder: (context,anination) =>
-                        Text(countText,style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),),
-                  ),
+
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(height: 10,),
+                      AnimatedBuilder( //動畫監聽器
+                        animation: controller, //綁定controller
+                        builder: (context,anination) =>
+                            Text(countText,style: TextStyle(fontSize: 32,fontWeight: FontWeight.bold),),
+                      ),
+                      Text(clock_color == Colors.red ? "工作中" : "休息中",style: TextStyle(fontSize: 20,color: clock_color,fontWeight: FontWeight.bold),)
+                    ],
+                  )
                 ),
               ],
             )
@@ -150,43 +191,73 @@ class TimeState extends State<TimePage> with SingleTickerProviderStateMixin{
             mainAxisSize: MainAxisSize.min,
 
             children: [
-              IconButton(
-                  onPressed: () {
-                    if(controller.isAnimating) {
-                      controller.stop(); //計時暫停
-                      isPause.value = true;
-                    }
-                    else {
-                      controller.reverse( //倒數計時，由1遞減至0
-                        from: controller.value == 0 ? 1 : controller.value //讓動畫從指定from開始
-                      );
-                      isPause.value = false;
-                    }
-                  },
-                  icon: ValueListenableBuilder(
-                      valueListenable: isPause,
-                      builder: (context,value,child) =>
-                          value ? Icon(Icons.play_circle,size: 42,) : Icon(Icons.pause_circle,size: 36,)
-                  )
+              GestureDetector(
+                onTap: () {
+                  isPause.value = true;
+                  setState(() {
+                    isReset = true;
+                  });
+                  controller.reset();
+                },
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  child: Icon(Icons.stop,size: 30,color: Colors.white,),
+                  decoration: BoxDecoration(
+                      color: Colors.grey[800],
+                      borderRadius: BorderRadius.circular(90)
+                  ),
+                ),
               ),
 
-              IconButton(
-                  onPressed: () {
-                    isPause.value = true;
-                    setState(() {
-                      isReset = true;
-                    });
+              SizedBox(width: 20,),
 
-                    controller.reset(); //重製時間
-                  },
-                  icon: Icon(Icons.stop_circle,size: 42,)
-              )
+              GestureDetector(
+                onTap: () {
+                  if(controller.isAnimating) {
+                    controller.stop(); //計時暫停
+                    isPause.value = true;
+                  }
+                  else {
+                    controller.forward( //倒數計時，由1遞減至0
+                        from: controller.value == 1 ? 0 : controller.value //讓動畫從指定from開始
+                    );
+                    isPause.value = false;
+                  }
+                },
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  child: ValueListenableBuilder(
+                      valueListenable: isPause,
+                      builder: (context,value,child) =>
+                      value ? Icon(Icons.play_arrow,size: 30,color: Colors.white,) : Icon(Icons.pause,size: 30,color: Colors.white,)
+                  ),
+                  decoration: BoxDecoration(
+                      color: Colors.grey[800],
+                      borderRadius: BorderRadius.circular(90)
+                  ),
+                ),
+              ),
+              SizedBox(width: 50,)
+              /*GestureDetector(
+
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    child: Icon(Icons.skip_next_rounded,size: 32,color: Colors.white,),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[800],
+                      borderRadius: BorderRadius.circular(90)
+                    ),
+                  ),
+                )*/
             ],
           ),
-
-          //ListPage(key: listPageKey,),
+          SizedBox(height: 10,)
         ],
       ),
     );
   }
 }
+
