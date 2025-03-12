@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:p0/list.dart';
 
@@ -15,6 +17,7 @@ class MyChartState extends State<MyChart> with SingleTickerProviderStateMixin {
   List<double> items = [1.0,1.0];
   List<double> nowTimes = [0.0,0.0];
   double t = 1.0;
+  int selectedSection = -1;
 
   @override
   void initState() {
@@ -107,6 +110,7 @@ class MyChartState extends State<MyChart> with SingleTickerProviderStateMixin {
     });
   }
 
+
   Widget TextPaint(String str,Color c,int size) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -123,6 +127,47 @@ class MyChartState extends State<MyChart> with SingleTickerProviderStateMixin {
     );
   }
 
+  Widget Pointer(bool bl) {
+    double wid = 40.0,size = 14.0;
+    if(!items[0].isNaN && (((items[0] * 100).toInt() >= 100 && bl) || ((items[1] * 100).toInt() >= 100) && !bl) ){
+      wid = 34.0;
+      size = 12.0;
+    }
+    else if(!items[0].isNaN && (((items[0] * 100).toInt() >= 10 && bl) || ((items[1] * 100).toInt() >= 10) && !bl) ){
+      //wid = 34.0;
+      size = 13.0;
+    }
+
+
+    return Expanded(
+        child: Align(
+          alignment: bl ? Alignment.centerLeft : Alignment.centerRight,
+          child: Container(
+            margin: EdgeInsets.only(top: 100),
+            child: SizeTransition(
+                sizeFactor: _animation,
+                axis: Axis.horizontal,
+                axisAlignment: bl ? 1 : -1,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+
+                  children: [
+                    Text(bl ? '${(items[0].isNaN ? 0 : items[0] * 100).toInt()}% ' : '',style: TextStyle(fontSize: size),),
+                    Container(
+                      width: wid,
+                      height: 2,
+                      color: Colors.black54,
+                    ),
+                    Text(!bl ? ' ${(items[1].isNaN ? 0 : items[1] * 100).toInt()}%' : '',style: TextStyle(fontSize: size),),
+                  ],
+                )
+            ),
+          ),
+        )
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -132,20 +177,48 @@ class MyChartState extends State<MyChart> with SingleTickerProviderStateMixin {
         mainAxisSize: MainAxisSize.min,
 
         children: [
-          SizedBox(height: 100,),
-          SizedBox(
-            width: 200,
-            height: 200,
-            child: CustomPaint(
-              painter: PieChartPainter(
-                values: items,
-                colors: [Colors.red, Colors.green],
-                animationValue: _controller.value
+          SizedBox(height: 60,),
+          Stack(
+            alignment: Alignment.center,
+
+            children: [
+              SizedBox(
+                width: 160,
+                height: 160,
+                child: CustomPaint(
+                  painter: PieChartPainter(
+                      values: items,
+                      colors: [Colors.red, Colors.green],
+                      animationValue: _controller.value
+                  ),
+                ),
               ),
-            ),
+
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.92,
+                height: 280,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Pointer(true),
+                    Pointer(false),
+                  ],
+                ),
+              )
+              /*child: SizeTransition(
+                  sizeFactor: _animation,
+                  axis: Axis.horizontal,
+                  axisAlignment: -1,
+                  child: Container(
+                    width: 70,
+                    height: 2,
+                    color: Colors.black54,
+                  )
+                ),*/
+            ],
           ),
 
-          SizedBox(height: 60,),
+          SizedBox(height: 30,),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -158,7 +231,7 @@ class MyChartState extends State<MyChart> with SingleTickerProviderStateMixin {
           SizedBox(height: 30,),
           Container(
             width: MediaQuery.of(context).size.width * 0.9,
-            height: 180,
+            height: 140,
             padding: const EdgeInsets.only(top: 10,left: 12),
             decoration: BoxDecoration(
               color: Color(0xB000000),
