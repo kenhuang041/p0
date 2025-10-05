@@ -118,7 +118,7 @@ class TimeState extends State<TimePage> with SingleTickerProviderStateMixin{
                     backgroundColor: Colors.grey[300], //進度條背景色
                     value: progress, //當前進度
                     strokeAlign: 6, //粗細
-                    color: clock_color, //進度條顏色
+                    color: clock_color, //進度條顏色c
                   ),
                 ),
 
@@ -153,22 +153,7 @@ class TimeState extends State<TimePage> with SingleTickerProviderStateMixin{
                 ),
 
                 GestureDetector(
-                  onTap: () {
-                    /*showModalBottomSheet( //調整當前時間
-                        showDragHandle: true, //拖動欄
-                        scrollControlDisabledMaxHeightRatio: 0.33, //0~1 顯示高度
-                        context: context,
-                        builder: (context) =>
-                          CupertinoTimerPicker(
-                              onTimerDurationChanged: (value) {
-                                setState(() {
-                                  controller.duration = value; //更新當前時間
-                                });
-                              }
-                          )
-                    );*/
-                  },
-
+                  onTap: () {},
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [

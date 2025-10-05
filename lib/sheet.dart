@@ -10,7 +10,6 @@ class MyChart extends StatefulWidget {
 }
 
 class MyChartState extends State<MyChart> with SingleTickerProviderStateMixin {
-  //計算每個項目所占的弧度
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -34,27 +33,7 @@ class MyChartState extends State<MyChart> with SingleTickerProviderStateMixin {
     _animation.addListener(() {
       setState(() {});
     });
-    //List<double> arc = [];
-    /*for(int i=0; i<2; i++) {
-      if(i == 0) {
-        arc.add((items[i] * -360) * (3.14159 / 180));
-      }
-      else {
-        arc.add((arc[i-1] + (items[i] * -360) * (3.14159 / 180)));
-      }
 
-      CurvedAnimation curvedAnimation = CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOut,
-      );
-
-      _controller.addListener(() {
-        arc[i] =_controller.value;
-        setState(() {});
-      });
-
-      _controller.forward();
-    } */
     WidgetsBinding.instance.addPostFrameCallback((_) {
       updateItems();
       _controller.forward(from: 0.0);
@@ -74,6 +53,7 @@ class MyChartState extends State<MyChart> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
+  ///更新圓餅圖數據
   void updateItems() {
     if(!mounted) return; //防止widget已銷毀時調用setSat
 
@@ -104,13 +84,10 @@ class MyChartState extends State<MyChart> with SingleTickerProviderStateMixin {
 
         print(e);
       }
-      //print("$t DD");
-      //print("${items[0]} ${items[1]}");
-      //print("${total().tl[0]} ${total().tl[1]}");
     });
   }
 
-
+  ///圓餅圖下方文字樣式
   Widget TextPaint(String str,Color c,int size) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -127,6 +104,7 @@ class MyChartState extends State<MyChart> with SingleTickerProviderStateMixin {
     );
   }
 
+  ///顯示圓餅圖項目百分比
   Widget Pointer(bool bl) {
     double wid = 40.0,size = 14.0;
     if(!items[0].isNaN && (((items[0] * 100).toInt() >= 100 && bl) || ((items[1] * 100).toInt() >= 100) && !bl) ){
@@ -205,16 +183,6 @@ class MyChartState extends State<MyChart> with SingleTickerProviderStateMixin {
                   ],
                 ),
               )
-              /*child: SizeTransition(
-                  sizeFactor: _animation,
-                  axis: Axis.horizontal,
-                  axisAlignment: -1,
-                  child: Container(
-                    width: 70,
-                    height: 2,
-                    color: Colors.black54,
-                  )
-                ),*/
             ],
           ),
 
@@ -255,6 +223,7 @@ class MyChartState extends State<MyChart> with SingleTickerProviderStateMixin {
   }
 }
 
+///配合 _controller.value 繪製圓餅圖
 class PieChartPainter extends CustomPainter {
   final List<double> values;
   final List<Color> colors;

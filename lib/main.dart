@@ -32,8 +32,6 @@ class _MyHomePageState extends State<HomePage> {
   int current = 0;
   var items = [ListPage(),MyChart()];
   Key chartKey = UniqueKey();
-  //final GlobalKey<MyChartState> chartKey = GlobalKey<MyChartState>();
-
 
   @override
   Widget build(BuildContext context) {
